@@ -276,7 +276,7 @@ export default function ResultPage() {
               </div>
             </section>
 
-            {/* 体験談導線 */}
+            {/* 体験つぶやき導線 */}
             <Link
               href="/community"
               className="block bg-card border border-border rounded-xl p-5 hover:border-primary/40 transition-colors group"
@@ -290,7 +290,7 @@ export default function ResultPage() {
                     同じ悩みを持つ家族の声を見る
                   </p>
                   <p className="text-xs text-muted mt-0.5">
-                    体験談やQ&Aで参考にできます
+                    体験つぶやきやQ&Aで参考にできます
                   </p>
                 </div>
                 <span className="text-muted text-sm">→</span>

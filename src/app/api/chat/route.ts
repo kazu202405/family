@@ -7,14 +7,56 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// スキルファイルを読み込むヘルパー
-function loadSkill(categoryId: string): string {
+// スキルセクションを読み込むヘルパー
+function loadSkillSection(categoryId: string, section: string): string {
   try {
-    const skillPath = join(process.cwd(), "src", "skills", `${categoryId}.md`);
+    const skillPath = join(process.cwd(), "src", "skills", categoryId, `${section}.md`);
     return readFileSync(skillPath, "utf-8");
   } catch {
     return "";
   }
+}
+
+// 会話内容からどのセクションが必要かを判定
+// 一度マッチしたセクションは以降のリクエストでも維持される（会話全体を見る）
+function selectSections(categoryId: string, messages: { role: string; content: string }[]): string {
+  // coreは常に読む
+  const sections: string[] = [loadSkillSection(categoryId, "core")];
+
+  // 会話全体のユーザーメッセージを結合（一度出たキーワードは消えない）
+  const allUserMessages = messages
+    .filter((m) => m.role === "user")
+    .map((m) => m.content)
+    .join(" ");
+
+  // knowledge: 具体的な知識を求めている
+  const knowledgeKeywords = [
+    "種類", "違い", "どんな", "仕組み", "とは", "チェック", "症状", "特徴",
+    "わからない", "教えて", "知りたい", "どういう", "何がある", "一覧",
+  ];
+  if (knowledgeKeywords.some((kw) => allUserMessages.includes(kw))) {
+    sections.push(loadSkillSection(categoryId, "knowledge"));
+  }
+
+  // patterns: 具体的な対応方法を求めている
+  const patternKeywords = [
+    "どうしたら", "どうすれば", "拒否", "嫌がる", "困って", "うまくいかない",
+    "言い方", "伝え方", "切り出", "説得", "対応", "やり方", "方法",
+  ];
+  if (patternKeywords.some((kw) => allUserMessages.includes(kw))) {
+    sections.push(loadSkillSection(categoryId, "patterns"));
+  }
+
+  // resources: 相談先・費用・制度を求めている
+  const resourceKeywords = [
+    "相談", "窓口", "どこに", "費用", "いくら", "お金", "制度", "申請",
+    "手続き", "保険", "サービス", "業者", "専門家", "紹介", "案内",
+  ];
+  if (resourceKeywords.some((kw) => allUserMessages.includes(kw))) {
+    sections.push(loadSkillSection(categoryId, "resources"));
+  }
+
+  return sections.filter(Boolean).join("\n\n---\n\n");
 }
 
 // 共通の人格・ルール
@@ -125,8 +167,8 @@ export async function POST(request: NextRequest) {
   let systemContent: string;
 
   if (category && categoryLabels[category]) {
-    // Phase2: スキルファイルを読み込んで専門知識として注入
-    const skillContent = loadSkill(category);
+    // Phase2: 会話内容に応じて必要なスキルセクションだけ読み込む
+    const skillContent = selectSections(category, messages);
     const label = categoryLabels[category];
 
     systemContent = `あなたは「かぞくの窓口」の【${label}】専門カウンセラーです。

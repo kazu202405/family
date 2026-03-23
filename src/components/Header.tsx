@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "./AuthContext";
 import {
   MessageSquare,
   Building2,
@@ -15,30 +14,16 @@ import {
   Home,
   HandHeart,
   ArrowRight,
+  CircleDollarSign,
 } from "lucide-react";
 
 const publicNav = [
-  { href: "/pricing", label: "料金プラン", icon: null },
+  { href: "/pricing", label: "料金プラン", icon: CircleDollarSign },
 ];
 
-const privateNav = [
-  { href: "/chat", label: "相談する", icon: MessageSquare },
-  { href: "/consultants", label: "相談先一覧", icon: Building2 },
-  { href: "/community", label: "コミュニティ", icon: BookOpen },
-  { href: "/mypage", label: "マイページ", icon: User },
-];
-
-// モバイルボトムナビ — 4つに絞って認知負荷を下げる
-const bottomNav = [
-  { href: "/", label: "ホーム", icon: Home },
-  { href: "/chat", label: "相談", icon: MessageSquare },
-  { href: "/consultants", label: "相談先", icon: Building2 },
-  { href: "/mypage", label: "マイページ", icon: User },
-];
 
 export default function Header() {
   const pathname = usePathname();
-  const { isLoggedIn } = useAuth();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -61,13 +46,12 @@ export default function Header() {
 
   const closeSheet = useCallback(() => setSheetOpen(false), []);
 
-  // チャット画面とログイン画面ではヘッダーを出さない
-  // ログイン後はAppHeaderを使うので共通ヘッダーは非表示
-  // LP（/）とpricing（/pricing）だけ共通ヘッダーを表示
-  if (isLoggedIn) return null;
-  if (pathname === "/chat" || pathname === "/login" || pathname === "/register") return null;
+  // AppHeaderを使うページでは共通ヘッダーを出さない（ルートで判定）
+  const appPages = ["/chat", "/consultants", "/community", "/mypage"];
+  const hiddenPages = ["/login", "/register"];
+  if (appPages.includes(pathname) || hiddenPages.includes(pathname)) return null;
 
-  const navItems = isLoggedIn ? privateNav : publicNav;
+  const navItems = publicNav;
 
   return (
     <>
@@ -120,31 +104,19 @@ export default function Header() {
               })}
 
               {/* メインCTA */}
-              {!isLoggedIn ? (
-                <>
-                  <Link
-                    href="/login"
-                    className="ml-2 px-3 py-2 rounded-xl text-[13px] font-medium text-muted hover:text-foreground hover:bg-background/60 transition-colors"
-                  >
-                    ログイン
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="flex items-center gap-1.5 bg-primary text-white pl-4 pr-3.5 py-2 rounded-xl text-[13px] font-medium hover:bg-primary-hover transition-all hover:shadow-md active:scale-[0.98]"
-                  >
-                    新規登録
-                    <ArrowRight size={13} />
-                  </Link>
-                </>
-              ) : (
-                <Link
-                  href="/chat"
-                  className="ml-2 flex items-center gap-1.5 bg-primary text-white pl-4 pr-3.5 py-2 rounded-xl text-[13px] font-medium hover:bg-primary-hover transition-all hover:shadow-md active:scale-[0.98]"
-                >
-                  相談する
-                  <ArrowRight size={13} />
-                </Link>
-              )}
+              <Link
+                href="/login"
+                className="ml-2 px-3 py-2 rounded-xl text-[13px] font-medium text-muted hover:text-foreground hover:bg-background/60 transition-colors"
+              >
+                ログイン
+              </Link>
+              <Link
+                href="/register"
+                className="flex items-center gap-1.5 bg-primary text-white pl-4 pr-3.5 py-2 rounded-xl text-[13px] font-medium hover:bg-primary-hover transition-all hover:shadow-md active:scale-[0.98]"
+              >
+                新規登録
+                <ArrowRight size={13} />
+              </Link>
             </nav>
 
             {/* ── モバイル：ハンバーガー ── */}
@@ -250,67 +222,19 @@ export default function Header() {
 
             {/* ドロワー内CTA — 下部に固定 */}
             <div className="px-4 pb-6 pt-3 border-t border-border/40 safe-area-bottom">
-              {!isLoggedIn ? (
-                <Link
-                  href="/login"
-                  onClick={closeSheet}
-                  className="flex items-center justify-center gap-2 bg-primary text-white py-3 rounded-xl text-[14px] font-medium hover:bg-primary-hover transition-all active:scale-[0.98] shadow-sm"
-                >
-                  <LogIn size={15} />
-                  ログインして相談する
-                </Link>
-              ) : (
-                <Link
-                  href="/chat"
-                  onClick={closeSheet}
-                  className="flex items-center justify-center gap-2 bg-primary text-white py-3 rounded-xl text-[14px] font-medium hover:bg-primary-hover transition-all active:scale-[0.98] shadow-sm"
-                >
-                  <MessageSquare size={15} />
-                  相談をはじめる
-                </Link>
-              )}
+              <Link
+                href="/register"
+                onClick={closeSheet}
+                className="flex items-center justify-center gap-2 bg-primary text-white py-3 rounded-xl text-[14px] font-medium hover:bg-primary-hover transition-all active:scale-[0.98] shadow-sm"
+              >
+                <LogIn size={15} />
+                無料で相談をはじめる
+              </Link>
             </div>
           </div>
         </div>
       )}
 
-      {/* ─── モバイルボトムナビ（ログイン後のみ） ─── */}
-      {isLoggedIn && (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-xl border-t border-border/60 z-50 safe-area-bottom">
-          <div className="flex justify-around px-3 pt-2 pb-1.5">
-            {bottomNav.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex flex-col items-center gap-0.5 py-1 min-w-[56px]"
-                >
-                  <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-                      isActive
-                        ? "bg-primary/10 text-primary scale-105"
-                        : "text-muted"
-                    }`}
-                  >
-                    <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
-                  </div>
-                  <span
-                    className={`text-[10px] leading-none transition-colors ${
-                      isActive
-                        ? "text-primary font-bold"
-                        : "text-muted"
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
-      )}
     </>
   );
 }
