@@ -1,44 +1,45 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthContext";
 import AppHeader from "@/components/AppHeader";
+import { MessageSquare, Clock } from "lucide-react";
 
-// モック用の相談履歴データ
-const mockHistory = [
-  {
-    id: 1,
-    date: "2026年3月20日",
-    theme: "親の見守り",
-    summary: "離れて暮らす母の物忘れが増えている件。地域包括支援センターへの相談を推奨。",
-    urgency: "中",
-  },
-  {
-    id: 2,
-    date: "2026年3月15日",
-    theme: "実家・空き家",
-    summary: "実家の管理について。自治体の空き家相談窓口と不動産会社への相談を推奨。",
-    urgency: "低",
-  },
-  {
-    id: 3,
-    date: "2026年3月10日",
-    theme: "家族の話し合い",
-    summary: "兄弟間での介護負担の偏り。役割分担の見える化と家族会議の開催を推奨。",
-    urgency: "中",
-  },
-];
+type HistoryItem = {
+  id: number;
+  date: string;
+  category: string;
+  categoryLabel: string;
+  summary: string;
+  userName: string;
+};
 
-const urgencyBadge = {
-  低: "bg-primary-light text-primary",
-  中: "bg-accent-light text-accent",
-  高: "bg-danger-light text-danger",
+// カテゴリ別のカラー（8カテゴリ）
+const categoryColors: Record<string, string> = {
+  mimamori: "bg-blue-50 text-blue-600",
+  iryou: "bg-teal-50 text-teal-600",
+  kaigo: "bg-primary-light text-primary",
+  shisetsu: "bg-purple-50 text-purple-600",
+  akiya: "bg-amber-50 text-amber-600",
+  souzoku: "bg-orange-50 text-orange-600",
+  okane: "bg-emerald-50 text-emerald-600",
+  sougi: "bg-slate-100 text-slate-600",
 };
 
 export default function MyPage() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { isLoggedIn, user, logout } = useAuth();
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  // sessionStorageから履歴を読み込む
+  useEffect(() => {
+    const stored = sessionStorage.getItem("chatHistory");
+    if (stored) {
+      setHistory(JSON.parse(stored));
+    }
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -47,7 +48,7 @@ export default function MyPage() {
 
   return (
     <div className="flex flex-col min-h-dvh bg-background">
-      <AppHeader title="マイページ" subtitle="履歴・設定" />
+      {isLoggedIn && <AppHeader title="マイページ" subtitle="履歴・設定" />}
 
       <div className="flex-1 px-4 py-8">
         <div className="max-w-3xl mx-auto">
@@ -58,8 +59,10 @@ export default function MyPage() {
                 👤
               </div>
               <div className="flex-1">
-                <p className="font-bold">ゲストユーザー</p>
-                <p className="text-xs text-muted">無料プラン</p>
+                <p className="font-bold">{user?.name || "ゲストユーザー"}</p>
+                <p className="text-xs text-muted">
+                  {user ? `${user.prefecture}${user.city} · 無料プラン` : "無料プラン"}
+                </p>
               </div>
               <span className="text-xs bg-primary-light text-primary px-3 py-1 rounded-full">
                 無料
@@ -84,11 +87,11 @@ export default function MyPage() {
               <p className="text-sm font-medium mt-2">相談先一覧</p>
             </Link>
             <Link
-              href="/stories"
+              href="/community"
               className="bg-card border border-border rounded-2xl p-4 text-center hover:border-primary transition-colors"
             >
               <span className="text-2xl">📖</span>
-              <p className="text-sm font-medium mt-2">体験談</p>
+              <p className="text-sm font-medium mt-2">コミュニティ</p>
             </Link>
             <Link
               href="/pricing"
@@ -106,35 +109,47 @@ export default function MyPage() {
                 <span>📋</span> 相談履歴
               </h2>
               <span className="text-xs text-muted">
-                ※有料プランで保存可能
+                {history.length > 0
+                  ? `${history.length}件`
+                  : "※有料プランで保存可能"}
               </span>
             </div>
 
-            <div className="space-y-3">
-              {mockHistory.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-card border border-border rounded-2xl p-4 hover:border-primary transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs text-muted">{item.date}</span>
-                    <span className="text-xs bg-primary-light text-primary px-2 py-0.5 rounded-full">
-                      {item.theme}
-                    </span>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${
-                        urgencyBadge[item.urgency as keyof typeof urgencyBadge]
-                      }`}
-                    >
-                      緊急度：{item.urgency}
-                    </span>
+            {history.length > 0 ? (
+              <div className="space-y-3">
+                {history.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-card border border-border rounded-2xl p-4 hover:border-primary transition-colors"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs text-muted flex items-center gap-1">
+                        <Clock size={11} />
+                        {item.date}
+                      </span>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          categoryColors[item.category] || "bg-primary-light text-primary"
+                        }`}
+                      >
+                        {item.categoryLabel}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted leading-relaxed line-clamp-3">
+                      {item.summary}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted leading-relaxed">
-                    {item.summary}
-                  </p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-card border border-border rounded-2xl p-8 text-center">
+                <MessageSquare size={24} className="text-muted mx-auto mb-3" />
+                <p className="text-sm text-muted mb-1">相談履歴はまだありません</p>
+                <p className="text-xs text-muted">
+                  相談を完了すると、ここにカテゴリ別で表示されます
+                </p>
+              </div>
+            )}
           </section>
 
           {/* 有料プラン誘導 */}

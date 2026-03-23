@@ -65,12 +65,12 @@ export default function LoginPage() {
               ※ モック版のため入力不要でログインできます
             </p>
 
-            <div className="flex justify-center gap-4 mt-4 text-xs">
-              <Link href="/pricing" className="text-primary hover:underline">
-                料金プラン
-              </Link>
-              <Link href="/stories" className="text-primary hover:underline">
-                体験談を見る
+            <div className="text-center mt-4">
+              <Link
+                href="/register"
+                className="text-xs text-primary hover:underline font-medium"
+              >
+                はじめての方は新規登録 →
               </Link>
             </div>
           </div>

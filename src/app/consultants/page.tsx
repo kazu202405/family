@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import AppHeader from "@/components/AppHeader";
+import { useAuth } from "@/components/AuthContext";
+import { MapPin, ExternalLink } from "lucide-react";
 
 const categories = [
   {
@@ -79,12 +81,69 @@ const categories = [
 ];
 
 export default function ConsultantsPage() {
+  const { isLoggedIn, user } = useAuth();
+
+  // ユーザーの地域に基づく検索URLを生成
+  const areaLabel = user ? `${user.prefecture}${user.city}` : null;
+  const areaSearchLinks = user
+    ? [
+        {
+          label: "地域包括支援センター",
+          url: `https://www.google.com/search?q=${encodeURIComponent(`地域包括支援センター ${user.city}`)}`,
+        },
+        {
+          label: "市区町村の高齢者福祉窓口",
+          url: `https://www.google.com/search?q=${encodeURIComponent(`${user.city} 高齢者 福祉 相談窓口`)}`,
+        },
+        {
+          label: "空き家相談窓口",
+          url: `https://www.google.com/search?q=${encodeURIComponent(`${user.city} 空き家 相談`)}`,
+        },
+      ]
+    : [];
+
   return (
     <div className="flex flex-col min-h-dvh bg-background">
-      <AppHeader title="相談先一覧" subtitle="窓口カテゴリ" />
+      {isLoggedIn && (
+        <AppHeader title="相談先一覧" subtitle={areaLabel ? `${areaLabel}エリア` : "窓口カテゴリ"} />
+      )}
 
       <div className="flex-1 px-4 py-8">
         <div className="max-w-3xl mx-auto">
+          {/* エリアカード（登録ユーザーのみ） */}
+          {user && (
+            <section className="mb-8 bg-gradient-to-br from-primary-light to-card border border-primary/20 rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin size={16} className="text-primary" />
+                <h2 className="font-bold text-primary">
+                  {areaLabel}の相談窓口
+                </h2>
+              </div>
+              <p className="text-xs text-muted mb-4">
+                {user.name}さんのお住まいの地域で利用できる窓口です
+              </p>
+              <div className="space-y-2">
+                {areaSearchLinks.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between bg-card rounded-xl px-4 py-3 text-sm font-medium hover:border-primary border border-border transition-colors group"
+                  >
+                    <span className="group-hover:text-primary transition-colors">
+                      {link.label}
+                    </span>
+                    <ExternalLink size={14} className="text-muted group-hover:text-primary transition-colors" />
+                  </a>
+                ))}
+              </div>
+              <p className="text-[10px] text-muted mt-3">
+                ※ Google検索結果へのリンクです。実際の窓口情報は各自治体にご確認ください
+              </p>
+            </section>
+          )}
+
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold mb-2">相談先カテゴリ一覧</h1>
             <p className="text-sm text-muted">

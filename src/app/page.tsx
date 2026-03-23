@@ -122,6 +122,67 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 体験談（リード獲得用） */}
+      <section id="stories" className="py-12 px-4 bg-card scroll-mt-16">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-xl font-bold text-center mb-2">
+            利用された方の声
+          </h2>
+          <p className="text-sm text-muted text-center mb-8">
+            同じ悩みを持つご家族がどう動いたか
+          </p>
+          <div className="space-y-4">
+            {[
+              {
+                tag: "見守り",
+                age: "50代女性",
+                title: "離れて暮らす母の物忘れが増えて、最初に何をしたか",
+                quote:
+                  "週1回の電話で違和感を覚え、地域包括支援センターに相談。見守りサービスの存在を知り、まず週1回の訪問を依頼しました。",
+              },
+              {
+                tag: "介護",
+                age: "40代男性",
+                title: "父が転倒して入院。退院後の生活をどう組み立てたか",
+                quote:
+                  "病院のソーシャルワーカーに相談したことで、介護認定の申請からケアマネ紹介まで一気に進みました。",
+              },
+              {
+                tag: "家族会議",
+                age: "40代女性",
+                title: "兄弟で親の介護を話し合えなかった。きっかけは「紙に書いたこと」",
+                quote:
+                  "口で言うと感情的になるので、心配なことと希望を紙に書き出して共有。それだけで「ちゃんと話そう」という雰囲気になりました。",
+              },
+            ].map((story) => (
+              <article
+                key={story.title}
+                className="bg-background border border-border rounded-2xl p-5"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs bg-primary-light text-primary px-2 py-0.5 rounded-full">
+                    {story.tag}
+                  </span>
+                  <span className="text-xs text-muted">{story.age}</span>
+                </div>
+                <h3 className="font-bold text-sm mb-2">{story.title}</h3>
+                <p className="text-xs text-muted leading-relaxed italic">
+                  「{story.quote}」
+                </p>
+              </article>
+            ))}
+          </div>
+          <div className="text-center mt-6">
+            <Link
+              href="/register"
+              className="text-sm text-primary hover:underline font-medium"
+            >
+              登録して自分の状況も整理する →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* やらないこと */}
       <section className="py-12 px-4 bg-card border-t border-border">
         <div className="max-w-2xl mx-auto text-center">

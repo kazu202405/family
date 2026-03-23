@@ -7,7 +7,7 @@ export default function Footer() {
   const pathname = usePathname();
 
   // ログイン後のページ、チャット、ログイン画面ではフッターを表示しない
-  const appPages = ["/chat", "/login", "/consultants", "/stories", "/mypage", "/result", "/emergency"];
+  const appPages = ["/chat", "/login", "/register", "/consultants", "/community", "/mypage", "/result", "/emergency"];
   if (appPages.includes(pathname)) return null;
 
   return (
@@ -28,8 +28,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/stories" className="text-xs text-muted hover:text-foreground transition-colors">
-                  体験談
+                <Link href="/community" className="text-xs text-muted hover:text-foreground transition-colors">
+                  コミュニティ
                 </Link>
               </li>
             </ul>

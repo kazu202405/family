@@ -278,7 +278,7 @@ export default function ResultPage() {
 
             {/* 体験談導線 */}
             <Link
-              href="/stories"
+              href="/community"
               className="block bg-card border border-border rounded-xl p-5 hover:border-primary/40 transition-colors group"
             >
               <div className="flex items-center gap-3">

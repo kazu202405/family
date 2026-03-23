@@ -2,16 +2,9 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Send,
-  Eye,
-  HandHeart,
-  Hospital,
-  House,
-  Users,
-  FileText,
-} from "lucide-react";
+import { Send, HandHeart, ArrowRight, MessageSquare } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
+import { useAuth } from "@/components/AuthContext";
 
 type Message = {
   id: number;
@@ -19,47 +12,57 @@ type Message = {
   content: string;
 };
 
-const themes = [
-  { label: "親の見守り", icon: Eye },
-  { label: "介護の入口", icon: HandHeart },
-  { label: "施設入居", icon: Hospital },
-  { label: "実家・空き家", icon: House },
-  { label: "家族の話し合い", icon: Users },
-  { label: "相続の不安", icon: FileText },
-];
+// カテゴリのラベルマップ
+const categoryLabels: Record<string, string> = {
+  mimamori: "親の異変と見守り",
+  iryou: "通院・入院・医療",
+  kaigo: "介護のはじめかた",
+  shisetsu: "施設えらび",
+  akiya: "実家と空き家",
+  souzoku: "相続と備え",
+  okane: "お金と制度",
+  sougi: "葬儀・死後の手続き",
+};
 
 const initialMessage: Message = {
   id: 1,
   role: "assistant",
   content:
-    "こんにちは。かぞくの窓口です。\n\nご家族のことで気になっていること、ひとりで抱えていることはありませんか？\n\nまずは、どんなテーマでお話ししたいか教えてください。",
+    "こんにちは。かぞくの窓口です。\n\nご家族のことで気になっていること、心配なことはありませんか？\n\nどんなことでも構いません。まずはお話を聞かせてください。",
 };
 
 export default function ChatPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [input, setInput] = useState("");
-  const [showThemes, setShowThemes] = useState(true);
   const [isStreaming, setIsStreaming] = useState(false);
+  // pendingCategory: AIが判定したがユーザー未確認
+  const [pendingCategory, setPendingCategory] = useState<string | null>(null);
+  // confirmedCategory: ユーザーが承認済み → Phase2で使う
+  const [confirmedCategory, setConfirmedCategory] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isStreaming]);
+  }, [messages, isStreaming, pendingCategory]);
 
   const sendToApi = useCallback(
-    async (allMessages: Message[]) => {
+    async (allMessages: Message[], activeCategory: string | null) => {
       setIsStreaming(true);
       const apiMessages = allMessages.map((m) => ({
         role: m.role,
-        content: m.content,
+        content: m.content.replace(/\[CATEGORY:\w+\]/g, "").trim(),
       }));
 
       try {
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: apiMessages }),
+          body: JSON.stringify({
+            messages: apiMessages,
+            category: activeCategory,
+          }),
         });
 
         if (!response.ok) throw new Error("API error");
@@ -80,15 +83,46 @@ export default function ChatPage() {
           if (done) break;
           const chunk = decoder.decode(value);
           fullText += chunk;
+
+          const displayText = fullText.replace(/\[CATEGORY:\w+\]/g, "").trim();
           setMessages((prev) =>
             prev.map((m) =>
-              m.id === aiMsgId ? { ...m, content: fullText } : m
+              m.id === aiMsgId ? { ...m, content: displayText } : m
             )
           );
         }
 
+        // カテゴリ検知 → まだ確認カードを出すだけ（Phase2には切り替えない）
+        const categoryMatch = fullText.match(/\[CATEGORY:(\w+)\]/);
+        if (categoryMatch && !activeCategory && !pendingCategory) {
+          setPendingCategory(categoryMatch[1]);
+        }
+
+        // 整理結果検知 → 履歴に保存してresultページへ
         if (fullText.includes("---整理結果---")) {
-          sessionStorage.setItem("resultText", fullText);
+          const detectedCat = categoryMatch?.[1] || activeCategory || "unknown";
+          const history = JSON.parse(
+            sessionStorage.getItem("chatHistory") || "[]"
+          );
+          history.unshift({
+            id: Date.now(),
+            date: new Date().toLocaleDateString("ja-JP", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+            category: detectedCat,
+            categoryLabel: categoryLabels[detectedCat] || detectedCat,
+            summary: fullText
+              .replace(/\[CATEGORY:\w+\]/g, "")
+              .substring(0, 200),
+            userName: user?.name || "ゲスト",
+          });
+          sessionStorage.setItem("chatHistory", JSON.stringify(history));
+          sessionStorage.setItem(
+            "resultText",
+            fullText.replace(/\[CATEGORY:\w+\]/g, "")
+          );
           setTimeout(() => router.push("/result"), 2000);
         }
       } catch {
@@ -105,19 +139,28 @@ export default function ChatPage() {
         setIsStreaming(false);
       }
     },
-    [router]
+    [router, user, pendingCategory]
   );
 
-  const handleThemeSelect = async (theme: string) => {
-    setShowThemes(false);
-    const userMsg: Message = {
+  // 「専門AIに引き継ぐ」を押した
+  const handleConfirmHandoff = async () => {
+    if (!pendingCategory) return;
+    const cat = pendingCategory;
+    setConfirmedCategory(cat);
+    setPendingCategory(null);
+
+    // 引き継ぎメッセージをAI側に追加
+    const handoffMsg: Message = {
       id: messages.length + 1,
-      role: "user",
-      content: `${theme}について相談したい`,
+      role: "assistant",
+      content: `ありがとうございます。ここまでのお話をもとに、${categoryLabels[cat]}の専門カウンセラーとして、より詳しくお話を伺います。\n\nもう少し教えていただけますか？`,
     };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    await sendToApi(newMessages);
+    setMessages((prev) => [...prev, handoffMsg]);
+  };
+
+  // 「もう少し話す」を押した
+  const handleContinue = () => {
+    setPendingCategory(null);
   };
 
   const handleSend = async () => {
@@ -130,8 +173,7 @@ export default function ChatPage() {
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInput("");
-    setShowThemes(false);
-    await sendToApi(newMessages);
+    await sendToApi(newMessages, confirmedCategory);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -143,7 +185,20 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-dvh bg-background">
-      <AppHeader title="かぞくの窓口" subtitle="相談整理AI" hideBack />
+      <AppHeader
+        title="かぞくの窓口"
+        subtitle={confirmedCategory ? categoryLabels[confirmedCategory] : "相談整理AI"}
+        hideBack
+      />
+
+      {/* Phase2バッジ */}
+      {confirmedCategory && (
+        <div className="bg-primary-light border-b border-primary/10 px-4 py-2">
+          <p className="max-w-2xl mx-auto text-xs text-primary font-medium text-center">
+            {categoryLabels[confirmedCategory]}の専門カウンセラーが対応しています
+          </p>
+        </div>
+      )}
 
       {/* チャットエリア */}
       <div className="flex-1 overflow-y-auto px-4 py-5">
@@ -161,10 +216,10 @@ export default function ChatPage() {
                 </div>
               )}
               <div
-                className={`max-w-[78%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                className={`min-w-0 px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                   msg.role === "user"
-                    ? "bg-chat-user text-white rounded-2xl rounded-br-md shadow-sm"
-                    : "bg-card border border-border text-foreground rounded-2xl rounded-bl-md shadow-sm"
+                    ? "bg-chat-user text-white rounded-2xl rounded-br-md shadow-sm max-w-[85%]"
+                    : "flex-1 bg-card border border-border text-foreground rounded-2xl rounded-bl-md shadow-sm"
                 }`}
               >
                 {msg.content || (
@@ -178,30 +233,45 @@ export default function ChatPage() {
             </div>
           ))}
 
-          {/* テーマ選択ボタン */}
-          {showThemes && !isStreaming && (
-            <div className="grid grid-cols-2 gap-2 pl-11 chat-bubble-enter">
-              {themes.map((theme) => (
-                <button
-                  key={theme.label}
-                  onClick={() => handleThemeSelect(theme.label)}
-                  className="flex items-center gap-2 bg-card border border-border rounded-xl px-3.5 py-2.5 text-sm text-left hover:border-primary hover:bg-primary-light transition-all group"
-                >
-                  <theme.icon
-                    size={16}
-                    className="text-muted group-hover:text-primary transition-colors shrink-0"
-                  />
-                  <span className="group-hover:text-primary transition-colors">
-                    {theme.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-
           <div ref={messagesEndRef} />
         </div>
       </div>
+
+      {/* 確認カード（カテゴリ判定時に表示） */}
+      {pendingCategory && !confirmedCategory && (
+        <div className="border-t border-border bg-card px-4 py-4 animate-[fadeInUp_300ms_ease-out]">
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-primary-light border border-primary/20 rounded-2xl p-4">
+              <p className="text-sm font-bold text-foreground mb-1">
+                お悩みの整理ができてきました
+              </p>
+              <p className="text-xs text-muted mb-4">
+                ここまでのお話から、
+                <span className="font-bold text-primary">
+                  「{categoryLabels[pendingCategory]}」
+                </span>
+                の領域と思われます。専門のAIカウンセラーに引き継いで、より詳しくお話を伺いましょうか？
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleConfirmHandoff}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-primary text-white py-2.5 rounded-xl text-sm font-medium hover:bg-primary-hover transition-all active:scale-[0.98]"
+                >
+                  専門AIに引き継ぐ
+                  <ArrowRight size={14} />
+                </button>
+                <button
+                  onClick={handleContinue}
+                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-background border border-border rounded-xl text-sm font-medium text-muted hover:text-foreground hover:border-foreground/20 transition-all"
+                >
+                  <MessageSquare size={14} />
+                  もう少し話す
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 入力エリア */}
       <div className="border-t border-border bg-card/80 backdrop-blur-sm shrink-0">

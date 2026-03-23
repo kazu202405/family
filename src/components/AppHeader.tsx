@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Menu,
   X,
-  Home,
   MessageSquare,
   Building2,
   BookOpen,
@@ -18,7 +17,7 @@ import {
 const menuItems = [
   { href: "/chat", icon: MessageSquare, label: "相談する" },
   { href: "/consultants", icon: Building2, label: "相談先一覧" },
-  { href: "/stories", icon: BookOpen, label: "体験談" },
+  { href: "/community", icon: BookOpen, label: "みんなの体験談" },
   { href: "/mypage", icon: User, label: "マイページ" },
 ];
 
@@ -38,6 +37,7 @@ export default function AppHeader({
   hideBack = false,
 }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
   // ドロワーが開いたらbodyスクロールをロック
@@ -55,7 +55,8 @@ export default function AppHeader({
   return (
     <>
       <header className="border-b border-border bg-card/80 backdrop-blur-xl shrink-0 sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+          {/* 左側：戻る + ロゴ + タイトル */}
           <div className="flex items-center gap-3">
             {!hideBack && (
               <button
@@ -78,9 +79,33 @@ export default function AppHeader({
               </div>
             </div>
           </div>
+
+          {/* 右側：PC/タブレットはナビリンク、スマホはハンバーガー */}
+          <nav className="hidden md:flex items-center gap-1">
+            {menuItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`relative px-3 py-2 text-[13px] rounded-lg transition-colors ${
+                    isActive
+                      ? "text-primary font-semibold"
+                      : "text-muted hover:text-foreground hover:bg-background/60"
+                  }`}
+                >
+                  {item.label}
+                  {isActive && (
+                    <span className="absolute bottom-0.5 left-3 right-3 h-[2px] rounded-full bg-primary" />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-foreground hover:bg-background transition-colors"
+            className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-foreground hover:bg-background transition-colors"
             aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"}
           >
             {menuOpen ? <X size={18} /> : <Menu size={18} />}
@@ -88,9 +113,9 @@ export default function AppHeader({
         </div>
       </header>
 
-      {/* 右からスライドするドロワー */}
+      {/* 右ドロワー（スマホのみ） */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50">
+        <div className="md:hidden fixed inset-0 z-50">
           <div
             className="absolute inset-0 bg-foreground/25 backdrop-blur-[2px] animate-[fadeIn_200ms_ease-out]"
             onClick={() => setMenuOpen(false)}
@@ -109,19 +134,32 @@ export default function AppHeader({
               </button>
             </div>
             <nav className="flex-1 overflow-y-auto px-3 py-3">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-[14px] font-medium text-foreground hover:bg-background/60 transition-colors"
-                >
-                  <div className="w-9 h-9 rounded-lg bg-background text-muted flex items-center justify-center">
-                    <item.icon size={17} />
-                  </div>
-                  {item.label}
-                </Link>
-              ))}
+              {menuItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMenuOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-xl text-[14px] font-medium transition-colors ${
+                      isActive
+                        ? "bg-primary-light text-primary"
+                        : "text-foreground hover:bg-background/60"
+                    }`}
+                  >
+                    <div
+                      className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
+                        isActive
+                          ? "bg-primary text-white shadow-sm"
+                          : "bg-background text-muted"
+                      }`}
+                    >
+                      <item.icon size={17} />
+                    </div>
+                    {item.label}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
         </div>

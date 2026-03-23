@@ -18,14 +18,13 @@ import {
 } from "lucide-react";
 
 const publicNav = [
-  { href: "/stories", label: "体験談", icon: BookOpen },
   { href: "/pricing", label: "料金プラン", icon: null },
 ];
 
 const privateNav = [
   { href: "/chat", label: "相談する", icon: MessageSquare },
   { href: "/consultants", label: "相談先一覧", icon: Building2 },
-  { href: "/stories", label: "体験談", icon: BookOpen },
+  { href: "/community", label: "みんなの体験談", icon: BookOpen },
   { href: "/mypage", label: "マイページ", icon: User },
 ];
 
@@ -66,7 +65,7 @@ export default function Header() {
   // ログイン後はAppHeaderを使うので共通ヘッダーは非表示
   // LP（/）とpricing（/pricing）だけ共通ヘッダーを表示
   if (isLoggedIn) return null;
-  if (pathname === "/chat" || pathname === "/login") return null;
+  if (pathname === "/chat" || pathname === "/login" || pathname === "/register") return null;
 
   const navItems = isLoggedIn ? privateNav : publicNav;
 
@@ -120,15 +119,23 @@ export default function Header() {
                 );
               })}
 
-              {/* メインCTA — これだけが色付きで目立つ */}
+              {/* メインCTA */}
               {!isLoggedIn ? (
-                <Link
-                  href="/login"
-                  className="ml-2 flex items-center gap-1.5 bg-primary text-white pl-4 pr-3.5 py-2 rounded-xl text-[13px] font-medium hover:bg-primary-hover transition-all hover:shadow-md active:scale-[0.98]"
-                >
-                  <LogIn size={13} />
-                  ログイン
-                </Link>
+                <>
+                  <Link
+                    href="/login"
+                    className="ml-2 px-3 py-2 rounded-xl text-[13px] font-medium text-muted hover:text-foreground hover:bg-background/60 transition-colors"
+                  >
+                    ログイン
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="flex items-center gap-1.5 bg-primary text-white pl-4 pr-3.5 py-2 rounded-xl text-[13px] font-medium hover:bg-primary-hover transition-all hover:shadow-md active:scale-[0.98]"
+                  >
+                    新規登録
+                    <ArrowRight size={13} />
+                  </Link>
+                </>
               ) : (
                 <Link
                   href="/chat"
