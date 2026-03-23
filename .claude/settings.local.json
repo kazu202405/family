@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest kazoku-madoguchi --typescript --tailwind --eslint --app --src-dir --no-import-alias --use-npm)",
+      "Bash(printf 'no\\\\nno\\\\n')",
+      "Bash(yes \"\")",
+      "Bash(npm run:*)",
+      "Bash(npx next:*)",
+      "Bash(npm install:*)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_click"
+    ]
+  }
+}
