@@ -18,7 +18,7 @@ const categoryLabels: Record<string, string> = {
   iryou: "通院・入院・医療",
   kaigo: "介護のはじめかた",
   shisetsu: "施設えらび",
-  akiya: "実家と空き家",
+  fudosan: "実家と不動産",
   souzoku: "相続と備え",
   okane: "お金と制度",
   sougi: "葬儀・死後の手続き",

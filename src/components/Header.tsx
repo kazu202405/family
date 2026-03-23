@@ -24,7 +24,7 @@ const publicNav = [
 const privateNav = [
   { href: "/chat", label: "相談する", icon: MessageSquare },
   { href: "/consultants", label: "相談先一覧", icon: Building2 },
-  { href: "/community", label: "みんなの体験談", icon: BookOpen },
+  { href: "/community", label: "コミュニティ", icon: BookOpen },
   { href: "/mypage", label: "マイページ", icon: User },
 ];
 

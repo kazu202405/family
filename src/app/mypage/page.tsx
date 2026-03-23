@@ -22,7 +22,7 @@ const categoryColors: Record<string, string> = {
   iryou: "bg-teal-50 text-teal-600",
   kaigo: "bg-primary-light text-primary",
   shisetsu: "bg-purple-50 text-purple-600",
-  akiya: "bg-amber-50 text-amber-600",
+  fudosan: "bg-amber-50 text-amber-600",
   souzoku: "bg-orange-50 text-orange-600",
   okane: "bg-emerald-50 text-emerald-600",
   sougi: "bg-slate-100 text-slate-600",
@@ -48,7 +48,7 @@ export default function MyPage() {
 
   return (
     <div className="flex flex-col min-h-dvh bg-background">
-      {isLoggedIn && <AppHeader title="マイページ" subtitle="履歴・設定" />}
+      {isLoggedIn && <AppHeader title="マイページ" subtitle="履歴・設定" hideBack />}
 
       <div className="flex-1 px-4 py-8">
         <div className="max-w-3xl mx-auto">

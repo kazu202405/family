@@ -71,7 +71,7 @@ export default function StoriesPage() {
 
   return (
     <div className="flex flex-col min-h-dvh bg-background">
-      {isLoggedIn && <AppHeader title="みんなの体験談" subtitle="コミュニティ" />}
+      {isLoggedIn && <AppHeader title="コミュニティ" subtitle="みんなの体験談" hideBack />}
 
       <div className="flex-1 px-4 py-8">
         <div className="max-w-3xl mx-auto">

@@ -17,7 +17,7 @@ import {
 const menuItems = [
   { href: "/chat", icon: MessageSquare, label: "相談する" },
   { href: "/consultants", icon: Building2, label: "相談先一覧" },
-  { href: "/community", icon: BookOpen, label: "みんなの体験談" },
+  { href: "/community", icon: BookOpen, label: "コミュニティ" },
   { href: "/mypage", icon: User, label: "マイページ" },
 ];
 

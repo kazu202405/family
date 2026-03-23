@@ -105,7 +105,7 @@ export default function ConsultantsPage() {
   return (
     <div className="flex flex-col min-h-dvh bg-background">
       {isLoggedIn && (
-        <AppHeader title="相談先一覧" subtitle={areaLabel ? `${areaLabel}エリア` : "窓口カテゴリ"} />
+        <AppHeader title="相談先一覧" subtitle={areaLabel ? `${areaLabel}エリア` : "窓口カテゴリ"} hideBack />
       )}
 
       <div className="flex-1 px-4 py-8">
