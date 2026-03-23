@@ -12,7 +12,14 @@
       "mcp__plugin_playwright_playwright__browser_click",
       "mcp__plugin_playwright_playwright__browser_fill_form",
       "mcp__plugin_playwright_playwright__browser_type",
-      "mcp__plugin_playwright_playwright__browser_resize"
+      "mcp__plugin_playwright_playwright__browser_resize",
+      "Bash(wc -c \"C:/Users/KAZUYUKI G/Desktop/system/react/family/src/skills/\"*.md)",
+      "Bash(wc -c src/skills/*.md)",
+      "Read(//c/Users/KAZUYUKI G/Desktop/system/react/family/$SKILLS_DIR/**)",
+      "Bash(\"/c/Users/KAZUYUKI G/Desktop/system/react/family/split_skills.sh\")",
+      "Bash(bash \"/c/Users/KAZUYUKI G/Desktop/system/react/family/split_skills.sh\")",
+      "Bash(done)",
+      "Bash(curl:*)"
     ]
   }
 }
