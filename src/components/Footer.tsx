@@ -11,12 +11,12 @@ export default function Footer() {
   if (appPages.includes(pathname)) return null;
 
   return (
-    <footer className="border-t border-border bg-card py-8 px-4 pb-20 md:pb-8">
+    <footer className="border-t border-border bg-card py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-2 gap-6 mb-6 max-w-md mx-auto">
           <div>
             <p className="text-sm font-bold mb-2">サービス</p>
-            <ul className="space-y-1">
+            <ul className="space-y-1.5">
               <li>
                 <Link href="/chat" className="text-xs text-muted hover:text-foreground transition-colors">
                   相談する
@@ -36,39 +36,16 @@ export default function Footer() {
           </div>
           <div>
             <p className="text-sm font-bold mb-2">ご利用案内</p>
-            <ul className="space-y-1">
+            <ul className="space-y-1.5">
               <li>
                 <Link href="/pricing" className="text-xs text-muted hover:text-foreground transition-colors">
                   料金プラン
                 </Link>
               </li>
               <li>
-                <span className="text-xs text-muted">利用規約（準備中）</span>
-              </li>
-              <li>
-                <span className="text-xs text-muted">プライバシーポリシー（準備中）</span>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <p className="text-sm font-bold mb-2">サポート</p>
-            <ul className="space-y-1">
-              <li>
-                <span className="text-xs text-muted">お問い合わせ（準備中）</span>
-              </li>
-              <li>
-                <span className="text-xs text-muted">よくある質問（準備中）</span>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <p className="text-sm font-bold mb-2">運営</p>
-            <ul className="space-y-1">
-              <li>
-                <span className="text-xs text-muted">運営会社（準備中）</span>
-              </li>
-              <li>
-                <span className="text-xs text-muted">運営ポリシー（準備中）</span>
+                <Link href="/emergency" className="text-xs text-muted hover:text-foreground transition-colors">
+                  緊急窓口
+                </Link>
               </li>
             </ul>
           </div>

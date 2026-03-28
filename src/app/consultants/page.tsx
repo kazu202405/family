@@ -106,7 +106,7 @@ export default function ConsultantsPage() {
     <div className="flex flex-col min-h-dvh bg-background">
       <AppHeader title="相談先一覧" subtitle={areaLabel ? `${areaLabel}エリア` : "窓口カテゴリ"} hideBack />
 
-      <div className="flex-1 px-4 py-8">
+      <div className="flex-1 px-4 py-8 pb-20 md:pb-8">
         <div className="max-w-3xl mx-auto">
           {/* エリアカード（登録ユーザーのみ） */}
           {user && (

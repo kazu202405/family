@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { HandHeart } from "lucide-react";
 import { useAuth } from "@/components/AuthContext";
 
 export default function LoginPage() {
@@ -18,8 +19,10 @@ export default function LoginPage() {
       {/* ヘッダー */}
       <header className="border-b border-border bg-card">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-2">
-          <span className="text-2xl">🏠</span>
-          <span className="text-lg font-bold text-foreground">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-emerald-600 text-white flex items-center justify-center">
+            <HandHeart size={15} strokeWidth={2.5} />
+          </div>
+          <span className="text-[15px] font-bold text-foreground">
             かぞくの窓口
           </span>
         </div>
@@ -29,7 +32,7 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm">
           <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
-            <h1 className="text-xl font-bold text-center mb-6">ログイン</h1>
+            <h1 className="text-xl font-bold tracking-tight text-center mb-6">ログイン</h1>
 
             <div className="space-y-4">
               <div>

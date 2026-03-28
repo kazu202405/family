@@ -47,7 +47,7 @@ export default function Header() {
   const closeSheet = useCallback(() => setSheetOpen(false), []);
 
   // AppHeaderを使うページでは共通ヘッダーを出さない（ルートで判定）
-  const appPages = ["/chat", "/consultants", "/community", "/mypage"];
+  const appPages = ["/chat", "/consultants", "/community", "/mypage", "/result", "/emergency"];
   const hiddenPages = ["/login", "/register"];
   if (appPages.includes(pathname) || hiddenPages.includes(pathname)) return null;
 

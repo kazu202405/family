@@ -60,10 +60,10 @@ const faqs = [
 
 export default function PricingPage() {
   return (
-    <div className="px-4 py-8">
+    <div className="px-4 py-8 pb-20 md:pb-8">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-10">
-          <h1 className="text-2xl font-bold mb-2">料金プラン</h1>
+          <h1 className="text-2xl font-bold tracking-tight mb-2">料金プラン</h1>
           <p className="text-sm text-muted">
             まずは無料で。必要に応じて有料プランをご検討ください。
           </p>
@@ -85,7 +85,7 @@ export default function PricingPage() {
                   おすすめ
                 </p>
               )}
-              <h2 className="text-lg font-bold mb-1">{plan.name}</h2>
+              <h2 className="text-lg font-bold tracking-tight mb-1">{plan.name}</h2>
               <div className="flex items-baseline gap-1 mb-4">
                 <span
                   className={`text-3xl font-bold ${
@@ -113,13 +113,14 @@ export default function PricingPage() {
               </ul>
 
               <button
+                disabled={plan.highlight}
                 className={`w-full py-3 rounded-full text-sm font-medium transition-opacity ${
                   plan.highlight
-                    ? "bg-primary text-white hover:opacity-90"
+                    ? "bg-primary text-white opacity-60 cursor-not-allowed"
                     : "border border-border hover:bg-background"
                 }`}
               >
-                {plan.highlight ? "準備中" : "無料で始める"}
+                {plan.highlight ? "まもなく公開" : "無料で始める"}
               </button>
             </div>
           ))}
@@ -127,7 +128,7 @@ export default function PricingPage() {
 
         {/* FAQ */}
         <section className="mb-12">
-          <h2 className="text-lg font-bold mb-4 text-center">よくある質問</h2>
+          <h2 className="text-lg font-bold tracking-tight mb-4 text-center">よくある質問</h2>
           <div className="space-y-3">
             {faqs.map((faq, i) => (
               <details

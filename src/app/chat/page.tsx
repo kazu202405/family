@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Send, HandHeart, ArrowRight, MessageSquare } from "lucide-react";
+import { Send, HandHeart, ArrowRight, MessageSquare, ClipboardList } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import { useAuth } from "@/components/AuthContext";
 
@@ -41,7 +41,9 @@ export default function ChatPage() {
   const [pendingCategory, setPendingCategory] = useState<string | null>(null);
   // confirmedCategory: ユーザーが承認済み → Phase2で使う
   const [confirmedCategory, setConfirmedCategory] = useState<string | null>(null);
+  const [showResultButton, setShowResultButton] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -123,7 +125,7 @@ export default function ChatPage() {
             "resultText",
             fullText.replace(/\[CATEGORY:\w+\]/g, "")
           );
-          setTimeout(() => router.push("/result"), 2000);
+          setShowResultButton(true);
         }
       } catch {
         setMessages((prev) => [
@@ -132,14 +134,14 @@ export default function ChatPage() {
             id: allMessages.length + 1,
             role: "assistant",
             content:
-              "申し訳ありません。接続に問題が発生しました。もう一度お試しください。",
+              "申し訳ありません、少し混み合っているようです。30秒ほど待ってから、もう一度お話しいただけますか？",
           },
         ]);
       } finally {
         setIsStreaming(false);
       }
     },
-    [router, user, pendingCategory]
+    [user, pendingCategory]
   );
 
   // 「専門AIに引き継ぐ」を押した
@@ -163,6 +165,31 @@ export default function ChatPage() {
     setPendingCategory(null);
   };
 
+  // クイックスタートテーマ選択
+  const quickThemes = [
+    "親の見守りが気になる",
+    "介護のことで悩んでいる",
+    "施設を検討したい",
+    "実家・空き家をどうするか",
+    "相続のことが不安",
+    "その他（自由に相談）",
+  ];
+
+  const handleQuickTheme = async (theme: string) => {
+    if (theme === "その他（自由に相談）") {
+      textareaRef.current?.focus();
+      return;
+    }
+    const userMsg: Message = {
+      id: messages.length + 1,
+      role: "user",
+      content: theme,
+    };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    await sendToApi(newMessages, confirmedCategory);
+  };
+
   const handleSend = async () => {
     if (!input.trim() || isStreaming) return;
     const userMsg: Message = {
@@ -173,6 +200,10 @@ export default function ChatPage() {
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInput("");
+    // テキストエリアの高さをリセット
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
     await sendToApi(newMessages, confirmedCategory);
   };
 
@@ -181,6 +212,13 @@ export default function ChatPage() {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  // テキストエリア自動リサイズ
+  const handleTextareaInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    const el = e.currentTarget;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 80) + "px"; // 最大約3行
   };
 
   return (
@@ -211,7 +249,7 @@ export default function ChatPage() {
               }`}
             >
               {msg.role === "assistant" && (
-                <div className="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center shrink-0 mr-2.5 mt-1">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-emerald-600 text-white flex items-center justify-center shrink-0 mr-2.5 mt-1 shadow-sm">
                   <HandHeart size={16} />
                 </div>
               )}
@@ -232,6 +270,41 @@ export default function ChatPage() {
               </div>
             </div>
           ))}
+
+          {/* 初回注意書きカード */}
+          {messages.length === 1 && !isStreaming && (
+            <div className="ml-[42px] bg-background border border-border/60 rounded-xl px-4 py-3 text-[11px] text-muted leading-relaxed">
+              AIが状況を整理し、次の一歩をご提案します。医療診断・法律判断は行いません。緊急時は<a href="/emergency" className="text-primary underline">専門窓口</a>をご利用ください。
+            </div>
+          )}
+
+          {/* クイックスタートテーマ選択（初期メッセージのみの場合） */}
+          {messages.length === 1 && !isStreaming && (
+            <div className="grid grid-cols-2 gap-2 pl-[42px]">
+              {quickThemes.map((theme) => (
+                <button
+                  key={theme}
+                  onClick={() => handleQuickTheme(theme)}
+                  className="px-3 py-2.5 text-[13px] bg-primary-light text-primary border border-primary/20 rounded-xl hover:bg-primary hover:text-white transition-all active:scale-[0.97] text-left leading-snug"
+                >
+                  {theme}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* 整理結果ボタン */}
+          {showResultButton && (
+            <div className="flex justify-center pt-2">
+              <button
+                onClick={() => router.push("/result")}
+                className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-primary-hover transition-all active:scale-[0.98] shadow-md"
+              >
+                <ClipboardList size={16} />
+                整理結果を見る
+              </button>
+            </div>
+          )}
 
           <div ref={messagesEndRef} />
         </div>
@@ -277,12 +350,15 @@ export default function ChatPage() {
       <div className="border-t border-border bg-card/80 backdrop-blur-sm shrink-0">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-end gap-2">
           <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onInput={handleTextareaInput}
             onKeyDown={handleKeyDown}
             placeholder="お悩みを入力してください..."
             rows={1}
-            className="flex-1 border border-border rounded-xl px-4 py-2.5 text-sm bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            style={{ height: "auto", maxHeight: "5rem" }}
+            className="flex-1 border border-border rounded-xl px-4 py-2.5 text-sm bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all overflow-y-auto"
           />
           <button
             onClick={handleSend}

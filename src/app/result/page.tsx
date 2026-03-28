@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import AppHeader from "@/components/AppHeader";
 import {
-  ArrowLeft,
   ClipboardList,
   MessageCircle,
   Zap,
@@ -12,7 +12,6 @@ import {
   BookOpen,
   Bookmark,
   RefreshCw,
-  Home,
   Landmark,
   HeartHandshake,
   Hospital,
@@ -21,6 +20,10 @@ import {
   Scale,
   House,
   Phone,
+  Copy,
+  Check,
+  ExternalLink,
+  Search,
 } from "lucide-react";
 
 type ResultData = {
@@ -141,8 +144,28 @@ const urgencyConfig = {
   },
 };
 
+// ステップテキストに含まれるキーワードに対応する検索リンクを生成
+function getStepSearchLink(
+  step: string
+): { label: string; url: string } | null {
+  if (step.includes("地域包括支援センター")) {
+    return {
+      label: "地域包括支援センター を検索",
+      url: "https://www.google.com/search?q=%E5%9C%B0%E5%9F%9F%E5%8C%85%E6%8B%AC%E6%94%AF%E6%8F%B4%E3%82%BB%E3%83%B3%E3%82%BF%E3%83%BC+%E7%9B%B8%E8%AB%87",
+    };
+  }
+  if (step.includes("ケアマネ")) {
+    return {
+      label: "ケアマネジャー を検索",
+      url: "https://www.google.com/search?q=%E3%82%B1%E3%82%A2%E3%83%9E%E3%83%8D%E3%82%B8%E3%83%A3%E3%83%BC+%E6%8E%A2%E3%81%97%E6%96%B9+%E7%9B%B8%E8%AB%87",
+    };
+  }
+  return null;
+}
+
 export default function ResultPage() {
   const [resultData, setResultData] = useState<ResultData>(defaultResult);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("resultText");
@@ -151,22 +174,51 @@ export default function ResultPage() {
     }
   }, []);
 
+  const handleCopy = useCallback(async () => {
+    const text = [
+      `【状況整理】${resultData.summary}`,
+      `【いちばんの不安】${resultData.mainConcern}`,
+      `【緊急度】${resultData.urgency}`,
+      `【次の一歩】\n${resultData.nextSteps.map((s, i) => `${i + 1}. ${s}`).join("\n")}`,
+      `【相談先】${resultData.consultants.join("、")}`,
+    ].join("\n\n");
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // クリップボードAPIが使えない場合は何もしない
+    }
+  }, [resultData]);
+
   const urgency = urgencyConfig[resultData.urgency];
 
   return (
-    <div className="flex flex-col min-h-full bg-background">
+    <div className="flex flex-col min-h-dvh bg-background">
+      <AppHeader title="整理結果" backHref="/chat" />
+
       {/* 結果コンテンツ */}
       <div className="flex-1 px-4 py-6">
         <div className="max-w-2xl mx-auto">
-          {/* タイトル */}
-          <div className="flex items-center gap-3 mb-6">
-            <Link
-              href="/chat"
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-foreground hover:bg-card transition-colors"
+          {/* コピーボタン */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1.5 text-xs text-muted hover:text-foreground border border-border rounded-lg px-3 py-1.5 hover:bg-card transition-colors"
             >
-              <ArrowLeft size={18} />
-            </Link>
-            <h1 className="text-lg font-bold">相談の整理結果</h1>
+              {copied ? (
+                <>
+                  <Check size={13} className="text-primary" />
+                  <span className="text-primary">コピーしました</span>
+                </>
+              ) : (
+                <>
+                  <Copy size={13} />
+                  <span>コピー</span>
+                </>
+              )}
+            </button>
           </div>
 
           <div className="space-y-4">
@@ -191,6 +243,23 @@ export default function ResultPage() {
                 <p className="text-sm mt-0.5">{urgency.sublabel}</p>
               </div>
             </section>
+
+            {/* 緊急度「高」の場合の緊急窓口誘導 */}
+            {resultData.urgency === "高" && (
+              <Link
+                href="/emergency"
+                className="block bg-danger-light border border-danger/20 rounded-xl p-4 hover:border-danger/40 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">🚨</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-danger">緊急の場合は専門窓口へ</p>
+                    <p className="text-xs text-muted mt-0.5">命の危険や暴力がある場合は、今すぐ専門窓口にご連絡ください</p>
+                  </div>
+                  <span className="text-danger text-sm">→</span>
+                </div>
+              </Link>
+            )}
 
             {/* 状況整理 */}
             <section className="bg-card border border-border rounded-xl p-5">
@@ -227,17 +296,44 @@ export default function ResultPage() {
                 <h2 className="text-sm font-bold">次の一歩</h2>
               </div>
               <ol className="space-y-3">
-                {resultData.nextSteps.map((step, i) => (
-                  <li key={i} className="flex gap-3 items-start">
-                    <span className="w-6 h-6 bg-primary text-white rounded-lg flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                      {i + 1}
-                    </span>
-                    <p className="text-sm leading-relaxed text-foreground/85">
-                      {step}
-                    </p>
-                  </li>
-                ))}
+                {resultData.nextSteps.map((step, i) => {
+                  const searchLink = getStepSearchLink(step);
+                  return (
+                    <li key={i} className="flex gap-3 items-start">
+                      <span className="w-6 h-6 bg-primary text-white rounded-lg flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                        {i + 1}
+                      </span>
+                      <div>
+                        <p className="text-sm leading-relaxed text-foreground/85">
+                          {step}
+                        </p>
+                        {searchLink && (
+                          <a
+                            href={searchLink.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary-hover mt-1.5 hover:underline"
+                          >
+                            <Search size={11} />
+                            {searchLink.label}
+                            <ExternalLink size={10} />
+                          </a>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ol>
+              {/* 相談先を探す導線 */}
+              <div className="mt-4 pt-3 border-t border-border">
+                <Link
+                  href="/consultants"
+                  className="inline-flex items-center gap-1.5 text-sm text-primary font-medium hover:text-primary-hover hover:underline transition-colors"
+                >
+                  相談先を探す
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </div>
             </section>
 
             {/* 相談先の種類 */}
@@ -322,7 +418,7 @@ export default function ResultPage() {
       </div>
 
       {/* フッターアクション */}
-      <div className="border-t border-border bg-card shrink-0">
+      <div className="border-t border-border bg-card shrink-0 pb-20 md:pb-8">
         <div className="max-w-2xl mx-auto px-4 py-4 flex gap-3">
           <Link
             href="/chat"
@@ -332,11 +428,11 @@ export default function ResultPage() {
             もう一度相談
           </Link>
           <Link
-            href="/"
+            href="/consultants"
             className="flex-1 flex items-center justify-center gap-2 bg-primary text-white rounded-xl py-3 text-sm font-medium hover:bg-primary-hover transition-colors"
           >
-            <Home size={14} />
-            トップに戻る
+            <Building2 size={14} />
+            相談先を探す
           </Link>
         </div>
       </div>

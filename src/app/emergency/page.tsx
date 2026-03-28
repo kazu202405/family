@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AppHeader from "@/components/AppHeader";
 
 const emergencyContacts = [
   {
@@ -41,7 +42,9 @@ const emergencyContacts = [
 
 export default function EmergencyPage() {
   return (
-    <div className="px-4 py-8">
+    <div className="flex flex-col min-h-dvh bg-background">
+      <AppHeader title="緊急窓口" backHref="/chat" />
+      <div className="flex-1 px-4 py-8 pb-20 md:pb-8">
       <div className="max-w-2xl mx-auto">
         {/* 緊急アラート */}
         <div className="bg-danger-light border-2 border-danger rounded-2xl p-6 mb-8 text-center">
@@ -108,12 +111,13 @@ export default function EmergencyPage() {
 
         <div className="text-center">
           <Link
-            href="/"
+            href="/chat"
             className="inline-block border border-border rounded-full px-6 py-3 text-sm font-medium hover:bg-card transition-colors"
           >
-            トップに戻る
+            相談画面に戻る
           </Link>
         </div>
+      </div>
       </div>
     </div>
   );

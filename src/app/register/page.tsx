@@ -45,6 +45,10 @@ export default function RegisterPage() {
   const [address, setAddress] = useState<AddressResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [ageGroup, setAgeGroup] = useState("");
+  const [role, setRole] = useState("");
+  const [themes, setThemes] = useState<string[]>([]);
+  const [introduction, setIntroduction] = useState("");
 
   // 郵便番号の入力ハンドラ（自動ハイフン挿入 + 7桁で自動検索）
   const handlePostalCodeChange = async (value: string) => {
@@ -92,6 +96,10 @@ export default function RegisterPage() {
       prefecture: address.prefecture,
       city: address.city,
       area: address.area,
+      ageGroup: ageGroup || undefined,
+      introduction: introduction.trim() || undefined,
+      themes: themes.length > 0 ? themes : undefined,
+      role: role || undefined,
     });
 
     router.push("/chat");
@@ -179,6 +187,93 @@ export default function RegisterPage() {
                   </div>
                 </div>
               )}
+
+              {/* 年代 */}
+              <div>
+                <label className="block text-sm text-muted mb-1">年代</label>
+                <p className="text-[11px] text-muted mb-2">同世代の方とつながりやすくなります</p>
+                <div className="flex flex-wrap gap-2">
+                  {["40代", "50代", "60代", "70代以上"].map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setAgeGroup(ageGroup === option ? "" : option)}
+                      className={`px-4 py-2 rounded-full text-sm transition-all ${
+                        ageGroup === option
+                          ? "bg-primary text-white"
+                          : "bg-background border border-border text-muted"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 立場 */}
+              <div>
+                <label className="block text-sm text-muted mb-1">ご自身の立場</label>
+                <p className="text-[11px] text-muted mb-2">あなたに近い経験の方をお探しできます</p>
+                <div className="flex flex-wrap gap-2">
+                  {["離れて暮らす子ども", "同居家族", "近くに住む子ども", "きょうだい", "その他"].map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setRole(role === option ? "" : option)}
+                      className={`px-4 py-2 rounded-full text-sm transition-all ${
+                        role === option
+                          ? "bg-primary text-white"
+                          : "bg-background border border-border text-muted"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* テーマ */}
+              <div>
+                <label className="block text-sm text-muted mb-1">気になっているテーマ</label>
+                <p className="text-[11px] text-muted mb-2">複数選択できます</p>
+                <div className="flex flex-wrap gap-2">
+                  {["見守り", "介護", "施設", "不動産", "相続", "お金"].map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() =>
+                        setThemes((prev) =>
+                          prev.includes(option)
+                            ? prev.filter((t) => t !== option)
+                            : [...prev, option]
+                        )
+                      }
+                      className={`px-4 py-2 rounded-full text-sm transition-all ${
+                        themes.includes(option)
+                          ? "bg-primary text-white"
+                          : "bg-background border border-border text-muted"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 自己紹介 */}
+              <div>
+                <label className="block text-sm text-muted mb-1">ひとこと（任意）</label>
+                <p className="text-[11px] text-muted mb-2">コミュニティで表示されます</p>
+                <textarea
+                  value={introduction}
+                  onChange={(e) => setIntroduction(e.target.value)}
+                  placeholder="例：同じ境遇の方と話したいです"
+                  maxLength={100}
+                  rows={3}
+                  className="w-full border border-border rounded-xl px-4 py-3 text-sm bg-background focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+                />
+                <p className="text-[11px] text-muted text-right mt-1">{introduction.length}/100</p>
+              </div>
 
               {/* エラー */}
               {error && (

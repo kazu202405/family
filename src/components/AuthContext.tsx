@@ -8,6 +8,11 @@ export type UserProfile = {
   prefecture: string;
   city: string;
   area: string; // 町域
+  // 新規フィールド
+  ageGroup?: string;        // "40代" | "50代" | "60代" | "70代以上"
+  introduction?: string;    // ひとこと自己紹介（自由記述、100文字程度）
+  themes?: string[];        // 気になるテーマ（複数選択）: "見守り", "介護", "施設", "不動産", "相続", "お金"
+  role?: string;            // 自分の立場: "離れて暮らす子ども", "同居家族", "近くに住む子ども", "きょうだい", "その他"
 };
 
 type AuthContextType = {

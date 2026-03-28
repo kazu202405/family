@@ -10,25 +10,29 @@ import {
   Building2,
   Home as HomeIcon,
   ScrollText,
-  Wallet,
-  Flower2,
   Check,
   ArrowRight,
   MessageCircle,
   Quote,
 } from "lucide-react";
-import AuthRedirect from "@/components/AuthRedirect";
+
 import FaqAccordion from "@/components/FaqAccordion";
 
 // --- データ定義 ---
 
 const worries = [
-  "親の物忘れが増えた気がする",
-  "介護って、何から始めればいいの？",
-  "実家のこと、兄弟と話せていない",
-  "施設を考えたいけど、罪悪感がある",
-  "相続のことが気になるけど、切り出せない",
-  "ひとりで抱え込んでしまっている",
+  {
+    situation: "電話越しに、母の声が少し変だった",
+    detail: "同じ話を繰り返す。冷蔵庫に同じものが3つ。「大丈夫よ」と言うけれど、本当に大丈夫なのか分からない。",
+  },
+  {
+    situation: "介護って、何から始めればいいの？",
+    detail: "認定？包括？ケアマネ？知らない言葉ばかり。ネットで調べても情報が多すぎて、結局何もできていない。",
+  },
+  {
+    situation: "兄弟に、実家のことを切り出せない",
+    detail: "親のこと、お金のこと、家のこと。話さなきゃと分かっているのに、どう切り出せばいいか分からない。",
+  },
 ];
 
 const steps = [
@@ -62,26 +66,27 @@ const boundaries = [
 
 const themes = [
   { Icon: Eye, title: "親の異変と見守り", description: "離れて暮らす親の変化が気になったら" },
-  { Icon: Stethoscope, title: "通院・入院", description: "付き添いや入院時の手続きについて" },
   { Icon: HeartHandshake, title: "介護のはじめかた", description: "何から始めればいいかわからないとき" },
   { Icon: Building2, title: "施設えらび", description: "施設の種類や選び方を整理したいとき" },
   { Icon: HomeIcon, title: "実家と不動産", description: "空き家・実家の管理や処分について" },
   { Icon: ScrollText, title: "相続と備え", description: "相続の準備や家族での話し合いについて" },
-  { Icon: Wallet, title: "お金と制度", description: "使える制度や費用の目安を知りたいとき" },
-  { Icon: Flower2, title: "葬儀・死後の手続き", description: "もしものときの準備や手続きについて" },
+  { Icon: Stethoscope, title: "通院・入院・制度", description: "付き添いや使える制度について" },
 ];
 
 const testimonials = [
   {
-    quote: "漠然とした不安を話しただけなのに、「まず何をすればいいか」が見えてきました。相談していいんだ、と思えたことが一番の収穫です。",
+    before: "母の物忘れが気になるけど、誰に相談していいか分からなかった",
+    quote: "漠然とした不安を話しただけなのに、「まず何をすればいいか」が見えてきました。翌日、地域包括支援センターに電話できました。",
     attribution: "Aさん　50代女性",
   },
   {
-    quote: "兄弟に切り出せなかった実家の話。ここで状況を整理してから話したら、びっくりするほどスムーズでした。",
+    before: "兄弟3人で実家のことを話し合えずにいた",
+    quote: "ここで状況を整理してから切り出したら、びっくりするほどスムーズに話が進みました。整理って大事ですね。",
     attribution: "Bさん　40代男性",
   },
   {
-    quote: "「まだ早いかも」と思っていたけど、早めに整理しておいてよかった。気持ちが軽くなりました。",
+    before: "「まだ早いかも」と思って、ずっと後回しにしていた",
+    quote: "早めに整理しておいてよかった。やるべきことが3つに絞られて、気持ちがすっと軽くなりました。",
     attribution: "Cさん　50代女性",
   },
 ];
@@ -149,25 +154,24 @@ function DotDivider() {
 export default function Home() {
   return (
     <>
-      <AuthRedirect />
-
       <div className="flex flex-col">
         {/* ══════════════════════════════════════════ */}
         {/* 1. ファーストビュー */}
         {/* ══════════════════════════════════════════ */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-primary-light/60 via-primary-light/30 to-background min-h-[85vh] sm:min-h-0 sm:py-24 md:py-32 flex items-center px-4">
+        <section className="relative overflow-hidden bg-gradient-to-b from-primary-light/60 via-primary-light/30 to-background min-h-[70vh] sm:min-h-0 sm:py-24 md:py-32 flex items-center px-4">
           <HeroBackground />
 
           <div className="relative max-w-5xl mx-auto w-full">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
               {/* 左：テキスト */}
               <div className="py-16 sm:py-0">
-                <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border/60 rounded-full px-4 py-1.5 mb-6">
+                <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border/60 rounded-full px-4 py-1.5 mb-4">
                   <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   <span className="text-xs text-muted font-medium">無料・押し売りなし</span>
                 </div>
+                <p className="text-xs text-muted mb-4">40〜60代のご家族の方へ</p>
 
-                <h1 className="text-[28px] sm:text-3xl md:text-[40px] font-bold text-foreground leading-snug md:leading-snug mb-2">
+                <h1 className="text-[28px] sm:text-3xl md:text-[40px] font-bold tracking-tight text-foreground leading-snug md:leading-snug mb-2">
                   親のことが、
                   <br />
                   気になりはじめたら。
@@ -194,54 +198,59 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 右：SVGイラスト + フローティングバッジ */}
+              {/* 右：チャットUIモックアップ */}
               <div className="hidden md:block relative">
-                {/* メインのイラスト的SVG */}
-                <svg viewBox="0 0 400 400" fill="none" className="w-full max-w-[380px] mx-auto" aria-hidden="true">
-                  {/* 背景の円 */}
-                  <circle cx="200" cy="200" r="160" fill="var(--primary)" opacity="0.06" />
-                  <circle cx="200" cy="200" r="120" fill="var(--primary)" opacity="0.04" />
+                <div className="w-full max-w-[360px] mx-auto bg-card/90 backdrop-blur-sm border border-border/60 rounded-2xl shadow-lg overflow-hidden">
+                  {/* チャットヘッダー */}
+                  <div className="flex items-center gap-2 px-4 py-3 border-b border-border/40 bg-primary-light/30">
+                    <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center">
+                      <MessageCircle size={14} className="text-primary" />
+                    </div>
+                    <span className="text-xs font-medium text-foreground">かぞくの窓口</span>
+                    <span className="ml-auto w-2 h-2 rounded-full bg-green-400" />
+                  </div>
 
-                  {/* 会話の吹き出し（大） */}
-                  <rect x="80" y="100" width="200" height="80" rx="20" fill="var(--card)" stroke="var(--border)" strokeWidth="1.5" />
-                  <circle cx="70" cy="140" r="22" fill="var(--primary)" opacity="0.15" />
-                  <circle cx="70" cy="140" r="12" fill="var(--primary)" opacity="0.3" />
-                  {/* テキスト行 */}
-                  <rect x="100" y="120" width="140" height="6" rx="3" fill="var(--primary)" opacity="0.15" />
-                  <rect x="100" y="134" width="100" height="6" rx="3" fill="var(--primary)" opacity="0.1" />
-                  <rect x="100" y="148" width="120" height="6" rx="3" fill="var(--primary)" opacity="0.08" />
+                  {/* チャット本文 */}
+                  <div className="p-4 space-y-3">
+                    {/* AI吹き出し */}
+                    <div className="flex gap-2">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <MessageCircle size={10} className="text-primary" />
+                      </div>
+                      <div className="bg-primary-light/50 border border-primary/10 rounded-xl rounded-tl-sm px-3 py-2 max-w-[85%]">
+                        <p className="text-xs text-foreground leading-relaxed">お話を聞かせてください。どんなことが気になっていますか？</p>
+                      </div>
+                    </div>
 
-                  {/* 整理結果の吹き出し */}
-                  <rect x="120" y="210" width="220" height="100" rx="20" fill="var(--primary)" opacity="0.08" stroke="var(--primary)" strokeWidth="1" opacity="0.15" />
-                  {/* チェックマーク行 */}
-                  <circle cx="148" cy="240" r="8" fill="var(--primary)" opacity="0.2" />
-                  <rect x="164" y="237" width="100" height="6" rx="3" fill="var(--primary)" opacity="0.12" />
-                  <circle cx="148" cy="262" r="8" fill="var(--primary)" opacity="0.2" />
-                  <rect x="164" y="259" width="80" height="6" rx="3" fill="var(--primary)" opacity="0.12" />
-                  <circle cx="148" cy="284" r="8" fill="var(--primary)" opacity="0.2" />
-                  <rect x="164" y="281" width="120" height="6" rx="3" fill="var(--primary)" opacity="0.12" />
+                    {/* ユーザー吹き出し */}
+                    <div className="flex justify-end">
+                      <div className="bg-primary text-white rounded-xl rounded-tr-sm px-3 py-2 max-w-[80%]">
+                        <p className="text-xs leading-relaxed">母の物忘れが増えてきて...</p>
+                      </div>
+                    </div>
 
-                  {/* 接続の矢印 */}
-                  <path d="M200 185 L200 205" stroke="var(--primary)" strokeWidth="2" opacity="0.2" strokeDasharray="4 3" />
-
-                  {/* 装飾ドット */}
-                  <circle cx="320" cy="120" r="4" fill="var(--accent)" opacity="0.3" />
-                  <circle cx="340" cy="280" r="6" fill="var(--primary)" opacity="0.15" />
-                  <circle cx="60" cy="260" r="5" fill="var(--accent)" opacity="0.2" />
-                </svg>
-
-                {/* フローティングバッジ */}
-                <div className="absolute top-6 -right-2 bg-card border border-border rounded-xl px-3 py-2 shadow-sm">
-                  <p className="text-[11px] text-muted">状況を</p>
-                  <p className="text-sm font-bold text-primary">整理</p>
-                </div>
-                <div className="absolute bottom-16 -left-4 bg-card border border-border rounded-xl px-3 py-2 shadow-sm">
-                  <p className="text-[11px] text-muted">次の一歩を</p>
-                  <p className="text-sm font-bold text-primary">提案</p>
-                </div>
-                <div className="absolute top-1/2 -right-6 bg-primary text-white rounded-xl px-3 py-2 shadow-md">
-                  <p className="text-[11px] opacity-80">相談先を</p>
-                  <p className="text-sm font-bold">ご案内</p>
+                    {/* AI整理カード */}
+                    <div className="flex gap-2">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <MessageCircle size={10} className="text-primary" />
+                      </div>
+                      <div className="bg-primary-light/50 border border-primary/10 rounded-xl rounded-tl-sm px-3 py-2.5 max-w-[85%] space-y-2">
+                        <p className="text-xs text-foreground leading-relaxed">整理してみますね。</p>
+                        <div className="bg-card border border-border/50 rounded-lg p-2.5 space-y-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <ClipboardList size={10} className="text-primary" />
+                            <span className="text-[10px] font-bold text-primary">状況整理</span>
+                          </div>
+                          <p className="text-[10px] text-muted leading-relaxed">お母様の物忘れの頻度・生活への影響を確認</p>
+                          <div className="border-t border-border/30 pt-1.5 flex items-center gap-1.5">
+                            <Compass size={10} className="text-accent" />
+                            <span className="text-[10px] font-bold text-accent">次の一歩</span>
+                          </div>
+                          <p className="text-[10px] text-muted leading-relaxed">地域包括支援センターへの相談をご案内</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -259,19 +268,21 @@ export default function Home() {
         <WaveDivider />
         <section className="pb-16 sm:pb-20 pt-4 px-4 bg-card">
           <div className="max-w-xl mx-auto">
-            <h2 className="text-xl sm:text-2xl font-bold text-center mb-3">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-center mb-3">
               こんなこと、ありませんか？
             </h2>
             <p className="text-sm text-muted text-center mb-10 leading-relaxed">
               日々のなかで、ふと気になること。
             </p>
 
-            {/* カードではなく、シンプルなチェックリスト */}
-            <ul className="space-y-0 divide-y divide-border">
+            <ul className="space-y-4">
               {worries.map((worry) => (
-                <li key={worry} className="flex items-center gap-4 py-4">
-                  <Check size={16} className="text-primary shrink-0" />
-                  <span className="text-sm sm:text-[15px] text-foreground">{worry}</span>
+                <li key={worry.situation} className="bg-background border border-border/60 rounded-xl p-5">
+                  <p className="text-[15px] font-bold text-foreground mb-2 flex items-start gap-3">
+                    <Check size={16} className="text-primary shrink-0 mt-1" />
+                    {worry.situation}
+                  </p>
+                  <p className="text-sm text-muted leading-relaxed pl-7">{worry.detail}</p>
                 </li>
               ))}
             </ul>
@@ -288,7 +299,7 @@ export default function Home() {
         <WaveDivider flip />
         <section className="pb-16 sm:pb-20 pt-8 px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-xl sm:text-2xl font-bold text-center mb-3">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-center mb-3">
               「かぞくの窓口」がやること
             </h2>
             <p className="text-sm text-muted text-center mb-14 leading-relaxed">
@@ -331,7 +342,7 @@ export default function Home() {
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center justify-center gap-2.5 mb-8">
               <ShieldCheck size={20} className="text-primary" />
-              <h2 className="text-lg sm:text-xl font-bold">安心してご利用いただくために</h2>
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight">安心してご利用いただくために</h2>
             </div>
 
             {/* 横一列（カードなし） */}
@@ -356,7 +367,7 @@ export default function Home() {
         <DotDivider />
         <section className="pb-16 sm:pb-20 px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-xl sm:text-2xl font-bold text-center mb-3">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-center mb-3">
               相談できるテーマ
             </h2>
             <p className="text-sm text-muted text-center mb-12 leading-relaxed">
@@ -385,22 +396,28 @@ export default function Home() {
         {/* ══════════════════════════════════════════ */}
         <section className="py-16 sm:py-20 px-4 bg-card">
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-xl sm:text-2xl font-bold text-center mb-3">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-center mb-3">
               利用された方の声
             </h2>
             <p className="text-sm text-muted text-center mb-12 leading-relaxed">
               同じ悩みを持つご家族から届いた言葉です。
             </p>
 
-            {/* 左ボーダーの引用スタイル（カードなし） */}
-            <div className="space-y-8">
+            {/* ビフォーアフター形式 */}
+            <div className="space-y-6">
               {testimonials.map((item, i) => (
-                <div key={i} className="relative pl-6 border-l-2 border-primary/20">
-                  <Quote size={18} className="absolute -left-[11px] -top-1 text-primary/20 bg-card" />
-                  <p className="text-sm sm:text-[15px] text-foreground leading-[1.9] mb-2">
-                    {item.quote}
+                <div key={i} className="bg-background border border-border/60 rounded-xl p-5">
+                  <p className="text-xs text-muted mb-3 flex items-center gap-2">
+                    <span className="shrink-0 w-5 h-5 rounded-full bg-muted/10 text-muted flex items-center justify-center text-[10px] font-bold">前</span>
+                    {item.before}
                   </p>
-                  <p className="text-xs text-muted">── {item.attribution}</p>
+                  <div className="relative pl-6 border-l-2 border-primary/25">
+                    <Quote size={16} className="absolute -left-[10px] -top-0.5 text-primary/20 bg-background" />
+                    <p className="text-sm sm:text-[15px] text-foreground leading-[1.9] mb-2">
+                      {item.quote}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted mt-3">── {item.attribution}</p>
                 </div>
               ))}
             </div>
@@ -413,7 +430,7 @@ export default function Home() {
         <DotDivider />
         <section className="pb-16 sm:pb-20 px-4">
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-xl sm:text-2xl font-bold text-center mb-3">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-center mb-3">
               よくある質問
             </h2>
             <p className="text-sm text-muted text-center mb-10 leading-relaxed">
@@ -430,7 +447,7 @@ export default function Home() {
         <WaveDivider />
         <section className="pb-16 sm:pb-20 pt-4 px-4 bg-card">
           <div className="max-w-xl mx-auto">
-            <h2 className="text-xl sm:text-2xl font-bold text-center mb-3">料金</h2>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-center mb-3">料金</h2>
             <p className="text-sm text-muted text-center mb-10 leading-relaxed">
               まずは無料でお試しいただけます。
             </p>
@@ -449,12 +466,20 @@ export default function Home() {
               </div>
               <div className="bg-accent-light/50 border border-accent/20 rounded-2xl p-6 sm:p-7">
                 <p className="text-sm font-medium text-accent mb-1">有料プラン</p>
-                <p className="text-3xl font-bold text-accent mb-4">準備中</p>
+                <div className="mb-4">
+                  <span className="inline-flex items-center gap-1.5 bg-accent/10 border border-accent/20 rounded-full px-3 py-1 text-xs font-medium text-accent">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                    まもなく公開
+                  </span>
+                </div>
                 <ul className="space-y-2.5 text-sm">
                   <li className="flex items-center gap-2.5"><Check size={14} className="text-accent shrink-0" />相談履歴の保存</li>
                   <li className="flex items-center gap-2.5"><Check size={14} className="text-accent shrink-0" />深掘り整理・詳細分析</li>
                   <li className="flex items-center gap-2.5"><Check size={14} className="text-accent shrink-0" />コミュニティ参加</li>
                 </ul>
+                <p className="mt-4 text-xs text-accent/70 hover:text-accent cursor-pointer underline underline-offset-2">
+                  公開時に通知を受け取る
+                </p>
               </div>
             </div>
 
@@ -483,7 +508,7 @@ export default function Home() {
           </svg>
 
           <div className="relative max-w-2xl mx-auto text-center">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4 leading-relaxed">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-4 leading-relaxed">
               まずは、話を整理してみませんか。
             </h2>
             <p className="text-sm sm:text-[15px] text-muted leading-relaxed mb-8 max-w-md mx-auto">
@@ -496,9 +521,9 @@ export default function Home() {
               className="inline-flex items-center gap-2 bg-primary text-white font-medium px-8 sm:px-10 py-4 rounded-full text-base sm:text-lg hover:bg-primary-hover transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
             >
               <MessageCircle size={20} />
-              無料で相談をはじめる
+              3分で状況を整理する
             </Link>
-            <p className="text-xs text-muted mt-5">登録不要・無料ではじめられます</p>
+            <p className="text-xs text-muted mt-5">無料・登録不要・押し売りなし</p>
           </div>
         </section>
       </div>

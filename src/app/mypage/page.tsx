@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthContext";
 import AppHeader from "@/components/AppHeader";
-import { MessageSquare, Clock, Pencil, X, MapPin, Save } from "lucide-react";
+import { MessageSquare, Clock, Pencil, X, MapPin, Save, User, LogOut, ArrowRight } from "lucide-react";
 
 type HistoryItem = {
   id: number;
@@ -37,6 +37,10 @@ export default function MyPage() {
   const [editPrefecture, setEditPrefecture] = useState("");
   const [editCity, setEditCity] = useState("");
   const [editArea, setEditArea] = useState("");
+  const [editAgeGroup, setEditAgeGroup] = useState("");
+  const [editRole, setEditRole] = useState("");
+  const [editThemes, setEditThemes] = useState<string[]>([]);
+  const [editIntroduction, setEditIntroduction] = useState("");
   const [isLookingUp, setIsLookingUp] = useState(false);
 
   const openProfileEdit = () => {
@@ -45,6 +49,10 @@ export default function MyPage() {
     setEditPrefecture(user?.prefecture || "");
     setEditCity(user?.city || "");
     setEditArea(user?.area || "");
+    setEditAgeGroup(user?.ageGroup || "");
+    setEditRole(user?.role || "");
+    setEditThemes(user?.themes || []);
+    setEditIntroduction(user?.introduction || "");
     setShowProfileEdit(true);
   };
 
@@ -85,6 +93,10 @@ export default function MyPage() {
       prefecture: editPrefecture,
       city: editCity,
       area: editArea,
+      ageGroup: editAgeGroup || undefined,
+      role: editRole || undefined,
+      themes: editThemes.length > 0 ? editThemes : undefined,
+      introduction: editIntroduction.trim() || undefined,
     });
     setShowProfileEdit(false);
   };
@@ -181,27 +193,41 @@ export default function MyPage() {
     router.push("/");
   };
 
+  // 最新の相談履歴（ダッシュボードヘッダー用）
+  const latestHistory = history.length > 0 ? history[0] : null;
+
   return (
     <div className="flex flex-col min-h-dvh bg-background">
       <AppHeader title="マイページ" subtitle="履歴・設定" hideBack />
 
-      <div className="flex-1 px-4 py-8">
+      <div className="flex-1 px-4 py-8 pb-20 md:pb-8">
         <div className="max-w-3xl mx-auto">
-          {/* ユーザー情報 */}
+          {/* ダッシュボードヘッダー */}
           <section className="bg-card border border-border rounded-2xl p-5 mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-primary-light flex items-center justify-center text-2xl shrink-0">
-                👤
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-14 h-14 rounded-full bg-primary-light flex items-center justify-center shrink-0">
+                <User size={24} className="text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold">{user?.name || "ゲストユーザー"}</p>
+                <p className="text-lg font-bold">
+                  おかえりなさい、{user?.name || "ゲスト"}さん
+                </p>
                 {user && (
                   <p className="text-xs text-muted flex items-center gap-1 mt-0.5">
                     <MapPin size={11} />
                     {user.prefecture}{user.city}{user.area && ` ${user.area}`}
                   </p>
                 )}
-                <p className="text-[10px] text-muted mt-0.5">無料プラン</p>
+                {(user?.ageGroup || user?.role) && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {user?.ageGroup && (
+                      <span className="text-[10px] bg-primary-light text-primary px-2 py-0.5 rounded-full">{user.ageGroup}</span>
+                    )}
+                    {user?.role && (
+                      <span className="text-[10px] bg-primary-light text-primary px-2 py-0.5 rounded-full">{user.role}</span>
+                    )}
+                  </div>
+                )}
               </div>
               <button
                 onClick={openProfileEdit}
@@ -211,45 +237,71 @@ export default function MyPage() {
                 <Pencil size={15} />
               </button>
             </div>
-          </section>
 
-          {/* メニュー */}
-          <section className="grid grid-cols-2 gap-3 mb-8">
-            <Link
-              href="/chat"
-              className="bg-card border border-border rounded-2xl p-4 text-center hover:border-primary transition-colors"
-            >
-              <span className="text-2xl">💬</span>
-              <p className="text-sm font-medium mt-2">新しい相談</p>
-            </Link>
-            <Link
-              href="/consultants"
-              className="bg-card border border-border rounded-2xl p-4 text-center hover:border-primary transition-colors"
-            >
-              <span className="text-2xl">🏢</span>
-              <p className="text-sm font-medium mt-2">相談先一覧</p>
-            </Link>
-            <Link
-              href="/community"
-              className="bg-card border border-border rounded-2xl p-4 text-center hover:border-primary transition-colors"
-            >
-              <span className="text-2xl">📖</span>
-              <p className="text-sm font-medium mt-2">コミュニティ</p>
-            </Link>
-            <Link
-              href="/pricing"
-              className="bg-card border border-border rounded-2xl p-4 text-center hover:border-primary transition-colors"
-            >
-              <span className="text-2xl">💰</span>
-              <p className="text-sm font-medium mt-2">プラン変更</p>
-            </Link>
+            {/* テーマ・ひとこと */}
+            {(user?.themes && user.themes.length > 0 || user?.introduction) && (
+              <div className="mb-4">
+                {user?.themes && user.themes.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {user.themes.map((theme) => (
+                      <span key={theme} className="text-[10px] bg-primary-light text-primary px-2 py-0.5 rounded-full font-medium">
+                        {theme}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {user?.introduction && (
+                  <p className="text-xs text-muted leading-relaxed">{user.introduction}</p>
+                )}
+              </div>
+            )}
+
+            {/* 前回の相談情報 */}
+            {latestHistory && (
+              <div className="bg-background rounded-xl px-4 py-3 mb-4">
+                <p className="text-xs text-muted mb-1">前回の相談</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted flex items-center gap-1">
+                    <Clock size={11} />
+                    {latestHistory.date}
+                  </span>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      categoryColors[latestHistory.category] || "bg-primary-light text-primary"
+                    }`}
+                  >
+                    {latestHistory.categoryLabel}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* アクションボタン */}
+            <div className="flex gap-3">
+              {latestHistory && (
+                <button
+                  onClick={() => {/* 前回の結果表示（将来実装） */}}
+                  className="flex-1 py-2.5 border border-border rounded-xl text-sm font-medium text-muted hover:bg-background transition-colors"
+                >
+                  前回の結果を見る
+                </button>
+              )}
+              <Link
+                href="/chat"
+                className="flex-1 flex items-center justify-center gap-1.5 bg-primary text-white py-2.5 rounded-xl text-sm font-medium hover:bg-primary-hover transition-colors"
+              >
+                <MessageSquare size={14} />
+                新しい相談
+              </Link>
+            </div>
           </section>
 
           {/* 相談履歴 */}
           <section className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold flex items-center gap-2">
-                <span>📋</span> 相談履歴
+                <Clock size={18} className="text-primary" />
+                相談履歴
               </h2>
               <span className="text-xs text-muted">
                 {history.length > 0
@@ -317,51 +369,46 @@ export default function MyPage() {
             )}
           </section>
 
-          {/* 有料プラン誘導 */}
-          <section className="bg-accent-light rounded-2xl p-6 text-center mb-8">
-            <p className="font-bold mb-2">有料プランにアップグレード</p>
-            <p className="text-sm text-muted mb-4">
-              履歴保存・深掘り整理・継続相談・コミュニティ投稿が使えるようになります
-            </p>
+          {/* 有料プランインラインカード */}
+          <section className="mb-8">
             <Link
               href="/pricing"
-              className="inline-block bg-accent text-white font-medium px-6 py-3 rounded-full hover:opacity-90 transition-opacity"
+              className="flex items-center gap-3 bg-card border border-border rounded-2xl px-5 py-4 hover:border-primary transition-colors group"
             >
-              プランを見る
+              <div className="flex-1 min-w-0">
+                <p className="text-sm leading-relaxed text-muted">
+                  履歴の保存や深掘り整理には有料プランが必要です
+                </p>
+              </div>
+              <span className="shrink-0 text-xs font-medium text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                詳細を見る
+                <ArrowRight size={13} />
+              </span>
             </Link>
           </section>
 
           {/* 設定 */}
           <section>
-            <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-              <span>⚙️</span> 設定
-            </h2>
             <div className="bg-card border border-border rounded-2xl overflow-hidden">
               <button
                 onClick={openProfileEdit}
                 className="w-full flex items-center justify-between px-5 py-4 text-sm hover:bg-background transition-colors border-b border-border"
               >
-                <span>プロフィール編集</span>
-                <Pencil size={14} className="text-muted" />
-              </button>
-              <button className="w-full flex items-center justify-between px-5 py-4 text-sm hover:bg-background transition-colors border-b border-border">
-                <span>通知設定</span>
-                <span className="text-muted text-xs">準備中</span>
-              </button>
-              <button className="w-full flex items-center justify-between px-5 py-4 text-sm hover:bg-background transition-colors border-b border-border">
-                <span>メールアドレス変更</span>
-                <span className="text-muted text-xs">準備中</span>
-              </button>
-              <button className="w-full flex items-center justify-between px-5 py-4 text-sm hover:bg-background transition-colors border-b border-border">
-                <span>パスワード変更</span>
-                <span className="text-muted text-xs">準備中</span>
+                <span className="flex items-center gap-2">
+                  <Pencil size={14} className="text-muted" />
+                  プロフィール編集
+                </span>
+                <ArrowRight size={14} className="text-muted" />
               </button>
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center justify-between px-5 py-4 text-sm text-danger hover:bg-danger-light transition-colors"
               >
-                <span>ログアウト</span>
-                <span>→</span>
+                <span className="flex items-center gap-2">
+                  <LogOut size={14} />
+                  ログアウト
+                </span>
+                <ArrowRight size={14} />
               </button>
             </div>
           </section>
@@ -464,6 +511,99 @@ export default function MyPage() {
                   className="w-full border border-border rounded-xl px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   placeholder="梅田"
                 />
+              </div>
+
+              {/* 年代 */}
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1.5">
+                  年代
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {["40代", "50代", "60代", "70代以上"].map((age) => (
+                    <button
+                      key={age}
+                      type="button"
+                      onClick={() => setEditAgeGroup(editAgeGroup === age ? "" : age)}
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                        editAgeGroup === age
+                          ? "bg-primary text-white"
+                          : "bg-background border border-border text-muted hover:border-primary"
+                      }`}
+                    >
+                      {age}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 立場 */}
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1.5">
+                  立場
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {["離れて暮らす子ども", "同居家族", "近くに住む子ども", "きょうだい", "その他"].map((role) => (
+                    <button
+                      key={role}
+                      type="button"
+                      onClick={() => setEditRole(editRole === role ? "" : role)}
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                        editRole === role
+                          ? "bg-primary text-white"
+                          : "bg-background border border-border text-muted hover:border-primary"
+                      }`}
+                    >
+                      {role}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* テーマ */}
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1.5">
+                  テーマ（複数選択可）
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {["見守り", "介護", "施設", "不動産", "相続", "お金"].map((theme) => (
+                    <button
+                      key={theme}
+                      type="button"
+                      onClick={() =>
+                        setEditThemes((prev) =>
+                          prev.includes(theme)
+                            ? prev.filter((t) => t !== theme)
+                            : [...prev, theme]
+                        )
+                      }
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                        editThemes.includes(theme)
+                          ? "bg-primary text-white"
+                          : "bg-background border border-border text-muted hover:border-primary"
+                      }`}
+                    >
+                      {theme}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* ひとこと */}
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1.5">
+                  ひとこと
+                </label>
+                <textarea
+                  value={editIntroduction}
+                  onChange={(e) => setEditIntroduction(e.target.value)}
+                  maxLength={100}
+                  rows={2}
+                  className="w-full border border-border rounded-xl px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                  placeholder="例：母の介護について相談したいです"
+                />
+                <p className="text-[10px] text-muted text-right mt-1">
+                  {editIntroduction.length}/100
+                </p>
               </div>
             </div>
 
